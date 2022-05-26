@@ -1,29 +1,25 @@
 import 'package:isar/isar.dart';
-import 'package:isar_testing/data/model/user.dart';
+import 'package:isar_testing/data/model/user/user.dart';
 import 'package:isar_testing/data/source/local/user_repository.dart';
-import 'package:path_provider/path_provider.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  late final Isar _isar;
+  late final _isar = Isar.getInstance();
   final List<User> users = [];
 
-  UserRepositoryImpl() {
-    _init();
-  }
-
-  _init() async {
-    final dir = await getApplicationSupportDirectory(); // path_provider package
-    _isar = await Isar.open(
-      schemas: [UserSchema],
-      directory: dir.path,
-    );
+  @override
+  Future<void> deleteUser(int id) async {
+    try {
+      await _isar?.writeTxn((isar) async => await _isar?.users.delete(id));
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Future<void> deleteLast() async {
     try {
       await _isar
-          .writeTxn((isar) async => await _isar.users.delete(users.last.id!));
+          ?.writeTxn((isar) async => await _isar?.users.delete(users.last.id!));
     } catch (e) {
       print(e);
     }
@@ -33,7 +29,11 @@ class UserRepositoryImpl implements UserRepository {
   Future<List<User>> getAll() async {
     try {
       users.clear();
-      users.addAll(await _isar.users.where().findAll());
+      users.addAll(await _isar?.users.where().findAll() as List<User>);
+      for (User user in users) {
+        await user.department.load();
+        print('$user.${user.department.value?.name}');
+      }
     } catch (e) {
       print(e);
     }
@@ -42,8 +42,18 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> addUser(User user) async {
+    print('repository addUser: ${user.department.value?.name}');
     try {
-      await _isar.writeTxn((isar) async => await _isar.users.put(user));
+      await _isar?.writeTxn((isar) async => await _isar?.users.put(user));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  Future<void> updateUser(User user) async {
+    try {
+      await _isar?.writeTxn((isar) async => await _isar?.users.put(user));
     } catch (e) {
       print(e);
     }

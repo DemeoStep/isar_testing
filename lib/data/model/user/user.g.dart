@@ -15,13 +15,13 @@ extension GetUserCollection on Isar {
 const UserSchema = CollectionSchema(
   name: 'User',
   schema:
-      '{"name":"User","idName":"id","properties":[{"name":"firstName","type":"String"},{"name":"lastName","type":"String"}],"indexes":[],"links":[]}',
+      '{"name":"User","idName":"id","properties":[{"name":"firstName","type":"String"},{"name":"lastName","type":"String"}],"indexes":[],"links":[{"name":"department","target":"Department"}]}',
   idName: 'id',
   propertyIds: {'firstName': 0, 'lastName': 1},
   listProperties: {},
   indexIds: {},
   indexValueTypes: {},
-  linkIds: {},
+  linkIds: {'department': 0},
   backlinkLinkNames: {},
   getId: _userGetId,
   getLinks: _userGetLinks,
@@ -44,7 +44,7 @@ int? _userGetId(User object) {
 }
 
 List<IsarLinkBase> _userGetLinks(User object) {
-  return [];
+  return [object.department];
 }
 
 void _userSerializeNative(IsarCollection<User> collection, IsarRawObject rawObj,
@@ -73,6 +73,7 @@ User _userDeserializeNative(IsarCollection<User> collection, int id,
     id: id,
     lastName: reader.readString(offsets[1]),
   );
+  _userAttachLinks(collection, id, object);
   return object;
 }
 
@@ -104,6 +105,7 @@ User _userDeserializeWeb(IsarCollection<User> collection, dynamic jsObj) {
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     lastName: IsarNative.jsObjectGet(jsObj, 'lastName') ?? '',
   );
+  _userAttachLinks(collection, IsarNative.jsObjectGet(jsObj, 'id'), object);
   return object;
 }
 
@@ -120,7 +122,9 @@ P _userDeserializePropWeb<P>(Object jsObj, String propertyName) {
   }
 }
 
-void _userAttachLinks(IsarCollection col, int id, User object) {}
+void _userAttachLinks(IsarCollection col, int id, User object) {
+  object.department.attach(col, col.isar.departments, 'department', id);
+}
 
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
   QueryBuilder<User, User, QAfterWhere> anyId() {
@@ -445,7 +449,16 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }
 }
 
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
+extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
+  QueryBuilder<User, User, QAfterFilterCondition> department(
+      FilterQuery<Department> q) {
+    return linkInternal(
+      isar.departments,
+      q,
+      'department',
+    );
+  }
+}
 
 extension UserQueryWhereSortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByFirstName() {

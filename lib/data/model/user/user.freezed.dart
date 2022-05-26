@@ -109,8 +109,9 @@ class __$$_UserCopyWithImpl<$Res> extends _$UserCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_User implements _User {
-  const _$_User({this.id, required this.firstName, required this.lastName});
+class _$_User extends _User {
+  _$_User({this.id, required this.firstName, required this.lastName})
+      : super._();
 
   factory _$_User.fromJson(Map<String, dynamic> json) => _$$_UserFromJson(json);
 
@@ -155,11 +156,12 @@ class _$_User implements _User {
   }
 }
 
-abstract class _User implements User {
-  const factory _User(
+abstract class _User extends User {
+  factory _User(
       {final int? id,
       required final String firstName,
       required final String lastName}) = _$_User;
+  _User._() : super._();
 
   factory _User.fromJson(Map<String, dynamic> json) = _$_User.fromJson;
 

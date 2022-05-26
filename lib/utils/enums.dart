@@ -1,0 +1,1 @@
+enum CRUD { add, edit}
