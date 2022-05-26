@@ -14,29 +14,24 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final _userRepository = GetIt.I<UserRepository>();
 
   UsersBloc() : super(UsersInitial()) {
-    on<GetAllUsersEvent>((event, emit) => _getAll(event, emit));
-    on<AddUserEvent>((event, emit) => _addUser(event, emit));
-    on<DeleteLastEvent>((event, emit) => _deleteLastUser(event, emit));
+    on<GetAllUsersEvent>((event, emit) => _getAll(emit));
+    on<DeleteLastEvent>((event, emit) => _deleteLastUser(emit));
     on<DeleteUserEvent>((event, emit) => _deleteUser(event, emit));
-    on<EditUserEvent>((event, emit) => _editUser(event, emit));
+    on<UpdateUserEvent>((event, emit) => _updateUser(event, emit));
+    add(GetAllUsersEvent());
   }
 
-  _getAll(GetAllUsersEvent event, Emitter<UsersState> emit) async {
-    var users = await _userRepository.getAll();
-    if (users.isNotEmpty) {
-      emit(GetAllUsersSuccess(users: users));
+  _getAll(Emitter<UsersState> emit) async {
+    await _userRepository.getAll();
+    print(_userRepository.users);
+    if (_userRepository.users.isNotEmpty) {
+      emit(GetAllUsersSuccess(users: _userRepository.users));
     } else {
       emit(UsersInitial());
     }
   }
 
-  _addUser(AddUserEvent event, Emitter<UsersState> emit) async {
-    print(event.user.department.value?.name);
-    await _userRepository.addUser(event.user);
-    add(GetAllUsersEvent());
-  }
-
-  _deleteLastUser(DeleteLastEvent event, Emitter<UsersState> emit) async {
+  _deleteLastUser(Emitter<UsersState> emit) async {
     await _userRepository.deleteLast();
     add(GetAllUsersEvent());
   }
@@ -46,7 +41,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     add(GetAllUsersEvent());
   }
 
-  _editUser(EditUserEvent event, Emitter<UsersState> emit) async {
+  _updateUser(UpdateUserEvent event, Emitter<UsersState> emit) async {
     await _userRepository.updateUser(event.user);
     add(GetAllUsersEvent());
   }

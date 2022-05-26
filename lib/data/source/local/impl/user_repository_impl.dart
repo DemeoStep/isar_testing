@@ -4,7 +4,10 @@ import 'package:isar_testing/data/source/local/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   late final _isar = Isar.getInstance();
-  final List<User> users = [];
+  final List<User> _users = [];
+
+  @override
+  List<User> get users => _users;
 
   @override
   Future<void> deleteUser(int id) async {
@@ -18,8 +21,8 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> deleteLast() async {
     try {
-      await _isar
-          ?.writeTxn((isar) async => await _isar?.users.delete(users.last.id!));
+      await _isar?.writeTxn(
+          (isar) async => await _isar?.users.delete(_users.last.id!));
     } catch (e) {
       print(e);
     }
@@ -29,11 +32,11 @@ class UserRepositoryImpl implements UserRepository {
   Future<List<User>> getAll() async {
     try {
       users.clear();
-      users.addAll(await _isar?.users.where().findAll() as List<User>);
-      for (User user in users) {
+      var newList = await _isar?.users.where().findAll() as List<User>;
+      for (User user in newList) {
         await user.department.load();
-        print('$user.${user.department.value?.name}');
       }
+      users.addAll(newList);
     } catch (e) {
       print(e);
     }
@@ -41,19 +44,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<void> addUser(User user) async {
-    print('repository addUser: ${user.department.value?.name}');
-    try {
-      await _isar?.writeTxn((isar) async => await _isar?.users.put(user));
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  @override
   Future<void> updateUser(User user) async {
     try {
-      await _isar?.writeTxn((isar) async => await _isar?.users.put(user));
+      await _isar?.writeTxn((isar) async {
+        await _isar?.users.put(user);
+        await user.department.save();
+      });
     } catch (e) {
       print(e);
     }

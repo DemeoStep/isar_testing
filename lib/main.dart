@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_testing/core/di.dart';
 import 'package:isar_testing/data/model/department/department.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => UsersBloc(),
+            create: (context) => GetIt.I<UsersBloc>(),
           ),
           BlocProvider(
             create: (context) => DepartmentsBloc(),

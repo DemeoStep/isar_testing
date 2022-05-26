@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:isar_testing/data/model/department/department.dart';
 import 'package:isar_testing/data/model/user/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,39 +18,32 @@ class HomeScreen extends StatelessWidget {
         builder: (context) {
           return MultiBlocProvider(
             providers: [
-              BlocProvider(
-                create: (context) => UsersBloc(),
-              ),
-              BlocProvider(
-                create: (context) => DepartmentsBloc(),
-              ),
+              BlocProvider(create: (context) => GetIt.I<UsersBloc>()),
+              BlocProvider(create: (context) => DepartmentsBloc()),
             ],
             child: AddEditUserDialog(
               user: user,
             ),
           );
-        }).then((value) => context.read<UsersBloc>().add(GetAllUsersEvent()));
+        });
   }
 
   _showDepartmentsDialog(
       {required BuildContext context, Department? department}) {
     showDialog(
-            context: context,
-            builder: (context) {
-              return BlocProvider(
-                create: (context) => DepartmentsBloc(),
-                child: AddEditDepartmentDialog(
-                  department: department,
-                ),
-              );
-            })
-        .then((value) =>
-            context.read<DepartmentsBloc>().add(GetAllDepartmentsEvent()));
+        context: context,
+        builder: (context) {
+          return BlocProvider(
+            create: (context) => DepartmentsBloc(),
+            child: AddEditDepartmentDialog(
+              department: department,
+            ),
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    context.read<UsersBloc>().add(GetAllUsersEvent());
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -61,8 +55,8 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: BlocBuilder<UsersBloc, UsersState>(
                     builder: (context, state) {
+                      print(state);
                       if (state is GetAllUsersSuccess) {
-                        print(state.users.first);
                         return ListView.builder(
                           itemCount: state.users.length,
                           itemBuilder: (context, index) {
@@ -137,7 +131,8 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        'state.users[index].department.value!.name',
+                                        state.users[index].department.value!
+                                            .name,
                                         textAlign: TextAlign.left,
                                       ),
                                     ),
@@ -156,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                           },
                         );
                       } else {
-                        return Container();
+                        return const SizedBox();
                       }
                     },
                   ),

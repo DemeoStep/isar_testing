@@ -37,18 +37,18 @@ class AddEditUserDialog extends StatelessWidget {
                 onPressed: () {
                   if (_formKey.currentState?.validate() == true) {
                     user == null
-                        ? context.read<UsersBloc>().add(AddUserEvent(
+                        ? context.read<UsersBloc>().add(UpdateUserEvent(
                             user: User(
                                 firstName: _firstNameController.text,
                                 lastName: _lastNameController.text)
                               ..department.value = userDepartment))
-                        : context.read<UsersBloc>().add(EditUserEvent(
+                        : context.read<UsersBloc>().add(UpdateUserEvent(
                             user: User(
                                 id: user?.id,
                                 firstName: _firstNameController.text,
                                 lastName: _lastNameController.text)
                               ..department.value = userDepartment));
-                    Navigator.pop(context);
+                    Navigator.pop(context, true);
                   }
                 },
                 child: user == null ? const Text('Add') : const Text('Apply'),
@@ -89,7 +89,10 @@ class AddEditUserDialog extends StatelessWidget {
                           onChanged: (value) {
                             userDepartment = departments[value!];
                           },
-                          value: 0,
+                          value: user == null
+                              ? 0
+                              : departments.indexWhere((element) =>
+                                  element.name == user?.department.value?.name),
                           list: departments
                               .map((e) => e.name.toString())
                               .toList())

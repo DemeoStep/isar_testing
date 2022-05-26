@@ -5,16 +5,10 @@ abstract class UsersEvent {}
 
 class GetAllUsersEvent extends UsersEvent {}
 
-class AddUserEvent extends UsersEvent {
+class UpdateUserEvent extends UsersEvent {
   final User user;
 
-  AddUserEvent({required this.user});
-}
-
-class EditUserEvent extends UsersEvent {
-  final User user;
-
-  EditUserEvent({required this.user});
+  UpdateUserEvent({required this.user});
 }
 
 class DeleteLastEvent extends UsersEvent {}
