@@ -23,7 +23,6 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
 
   _getAll(Emitter<UsersState> emit) async {
     await _userRepository.getAll();
-    print(_userRepository.users);
     if (_userRepository.users.isNotEmpty) {
       emit(GetAllUsersSuccess(users: _userRepository.users));
     } else {

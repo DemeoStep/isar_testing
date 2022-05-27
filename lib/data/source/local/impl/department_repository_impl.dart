@@ -5,33 +5,17 @@ import '../department_repository.dart';
 
 class DepartmentRepositoryImpl implements DepartmentRepository {
   late final _isar = Isar.getInstance();
-  final List<Department> departments = [];
+  final List<Department> _departments = [];
 
   @override
-  Future<void> addDepartment(Department department) async {
-    try {
-      await _isar
-          ?.writeTxn((isar) async => await _isar?.departments.put(department));
-    } catch (e) {
-      print(e);
-    }
-  }
+  List<Department> get departments => _departments;
 
   @override
   Future<void> deleteDepartment(int id) async {
     try {
-      await _isar
-          ?.writeTxn((isar) async => await _isar?.departments.delete(id));
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  @override
-  Future<void> deleteLast() async {
-    try {
-      await _isar?.writeTxn((isar) async =>
-          await _isar?.departments.delete(departments.last.id!));
+      await _isar?.writeTxn((isar) async {
+        await _isar?.departments.delete(id);
+      });
     } catch (e) {
       print(e);
     }
@@ -41,8 +25,9 @@ class DepartmentRepositoryImpl implements DepartmentRepository {
   Future<List<Department>> getAll() async {
     try {
       departments.clear();
-      departments.addAll(
-          await _isar?.departments.where().findAll() as List<Department>);
+      var newList =
+          await _isar?.departments.where().findAll() as List<Department>;
+      departments.addAll(newList);
     } catch (e) {
       print(e);
     }

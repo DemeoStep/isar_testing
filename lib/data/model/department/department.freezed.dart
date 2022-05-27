@@ -103,8 +103,8 @@ class __$$_DepartmentCopyWithImpl<$Res> extends _$DepartmentCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_Department implements _Department {
-  const _$_Department({this.id, required this.name});
+class _$_Department extends _Department {
+  _$_Department({this.id, required this.name}) : super._();
 
   factory _$_Department.fromJson(Map<String, dynamic> json) =>
       _$$_DepartmentFromJson(json);
@@ -146,9 +146,10 @@ class _$_Department implements _Department {
   }
 }
 
-abstract class _Department implements Department {
-  const factory _Department({final int? id, required final String name}) =
+abstract class _Department extends Department {
+  factory _Department({final int? id, required final String name}) =
       _$_Department;
+  _Department._() : super._();
 
   factory _Department.fromJson(Map<String, dynamic> json) =
       _$_Department.fromJson;

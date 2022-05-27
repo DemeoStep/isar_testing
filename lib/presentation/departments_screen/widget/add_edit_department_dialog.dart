@@ -27,14 +27,13 @@ class AddEditDepartmentDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState?.validate() == true) {
-              department == null
-                  ? context.read<DepartmentsBloc>().add(AddDepartmentEvent(
-                      department: Department(name: _departmentController.text)))
-                  : context.read<DepartmentsBloc>().add(EditDepartmentEvent(
-                      department: Department(
+              Navigator.pop(
+                  context,
+                  department == null
+                      ? Department(name: _departmentController.text)
+                      : Department(
                           id: department?.id,
-                          name: _departmentController.text)));
-              Navigator.pop(context);
+                          name: _departmentController.text));
             }
           },
           child: department == null ? const Text('Add') : const Text('Apply'),

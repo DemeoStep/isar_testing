@@ -17,27 +17,15 @@ class DepartmentsBloc extends Bloc<DepartmentsEvent, DepartmentsState> {
 
   DepartmentsBloc() : super(DepartmentsInitial()) {
     on<GetAllDepartmentsEvent>((event, emit) => _getAll(event, emit));
-    on<AddDepartmentEvent>((event, emit) => _addDepartment(event, emit));
-    on<DeleteLastEvent>((event, emit) => _deleteLastDepartment(event, emit));
     on<DeleteDepartmentEvent>((event, emit) => _deleteDepartment(event, emit));
-    on<EditDepartmentEvent>((event, emit) => _editDepartment(event, emit));
+    on<UpdateDepartmentEvent>((event, emit) => _updateDepartment(event, emit));
+    add(GetAllDepartmentsEvent());
   }
 
   _getAll(GetAllDepartmentsEvent event, Emitter<DepartmentsState> emit) async {
-    emit(GetAllDepartmentsSuccess(
-        departments: await _departmentRepository.getAll()));
-  }
-
-  _addDepartment(
-      AddDepartmentEvent event, Emitter<DepartmentsState> emit) async {
-    await _departmentRepository.addDepartment(event.department);
-    add(GetAllDepartmentsEvent());
-  }
-
-  _deleteLastDepartment(
-      DeleteLastEvent event, Emitter<DepartmentsState> emit) async {
-    await _departmentRepository.deleteLast();
-    add(GetAllDepartmentsEvent());
+    var departments = await _departmentRepository.getAll();
+    print(departments);
+    emit(GetAllDepartmentsSuccess(departments: departments));
   }
 
   _deleteDepartment(
@@ -46,8 +34,8 @@ class DepartmentsBloc extends Bloc<DepartmentsEvent, DepartmentsState> {
     add(GetAllDepartmentsEvent());
   }
 
-  _editDepartment(
-      EditDepartmentEvent event, Emitter<DepartmentsState> emit) async {
+  _updateDepartment(
+      UpdateDepartmentEvent event, Emitter<DepartmentsState> emit) async {
     await _departmentRepository.updateDepartment(event.department);
     add(GetAllDepartmentsEvent());
   }

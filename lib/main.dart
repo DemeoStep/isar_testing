@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
             create: (context) => GetIt.I<UsersBloc>(),
           ),
           BlocProvider(
-            create: (context) => DepartmentsBloc(),
+            create: (context) => GetIt.I<DepartmentsBloc>(),
           ),
         ],
         child: const HomeScreen(),

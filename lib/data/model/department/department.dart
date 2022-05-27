@@ -8,7 +8,9 @@ part 'department.freezed.dart';
 @Collection()
 @freezed
 class Department with _$Department {
-  const factory Department({
+  Department._();
+
+  factory Department({
     int? id,
     required String name,
   }) = _Department;
