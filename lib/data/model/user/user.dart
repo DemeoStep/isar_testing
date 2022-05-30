@@ -14,7 +14,8 @@ class User with _$User {
   factory User({
     int? id,
     required String firstName,
-    required String lastName,
+    @Index(unique: true, composite: [CompositeIndex('firstName')])
+        required String lastName,
   }) = _User;
 
   final department = IsarLink<Department>();

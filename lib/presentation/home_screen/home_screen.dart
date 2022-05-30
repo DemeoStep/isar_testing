@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:isar_testing/data/model/user/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:isar_testing/presentation/bloc/department_bloc/department_bloc.dart';
-import 'package:isar_testing/presentation/bloc/users_bloc/users_bloc.dart';
-import 'package:isar_testing/presentation/departments_screen/departments_screen.dart';
+import 'package:isar_testing/presentation/bloc/home_bloc/home_bloc.dart';
 import 'package:isar_testing/presentation/home_screen/widget/add_edit_user_dialog.dart';
+import 'package:isar_testing/presentation/home_screen/widget/dropdown_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   _showUsersDialog({required BuildContext context, User? user}) async {
     var result = await showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (context) {
           return AddEditUserDialog(
@@ -19,9 +18,27 @@ class HomeScreen extends StatelessWidget {
           );
         }) as User?;
     if (result != null) {
-      print(result);
-      context.read<UsersBloc>().add(UpdateUserEvent(user: result));
+      context.read<HomeBloc>().add(UpdateUserEvent(user: result));
     }
+  }
+
+  _showError({required BuildContext context, required String message}) async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text(
+                'Error',
+                style: TextStyle(color: Colors.red),
+              ),
+              content: Text(message),
+              actions: [
+                OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Ok')),
+              ],
+            ));
   }
 
   @override
@@ -31,27 +48,51 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Users'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: BlocBuilder<UsersBloc, UsersState>(
-                    builder: (context, state) {
-                      if (state is GetAllUsersSuccess) {
-                        return ListView.builder(
-                          itemCount: state.users.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            children: [
+              Expanded(
+                child: BlocConsumer<HomeBloc, HomeState>(
+                  listener: (context, state) {
+                    if (state is HomeErrorState) {
+                      _showError(context: context, message: state.error);
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is GetAllSuccess) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: DropdownWidget(
+                              value: 0,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  if (value == 0) {
+                                    context.read<HomeBloc>().add(GetAllEvent());
+                                  } else {
+                                    context.read<HomeBloc>().add(
+                                        GetAllFilteredEvent(
+                                            department:
+                                                state.departments[--value]));
+                                  }
+                                }
+                              },
+                              list: [
+                                'show all',
+                                ...state.departments.map((e) => e.name).toList()
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: state.users.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  leading: IconButton(
+                                    padding: EdgeInsets.zero,
                                     onPressed: () {
                                       _showUsersDialog(
                                           context: context,
@@ -59,137 +100,70 @@ class HomeScreen extends StatelessWidget {
                                     },
                                     icon: const Icon(Icons.edit),
                                   ),
-                                  Expanded(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 2, color: Colors.grey),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        state.users[index].id.toString(),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 2, color: Colors.grey),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        state.users[index].firstName,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 2, color: Colors.grey),
-                                      ),
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        state.users[index].lastName,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 2, color: Colors.grey),
-                                      ),
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        state.users[index].department.value
-                                                ?.name ??
-                                            '',
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
+                                  title: Text(
+                                      '${state.users[index].firstName} ${state.users[index].lastName} (${state.users[index].department.value?.name ?? 'no dep'})'),
+                                  trailing: IconButton(
+                                    padding: EdgeInsets.zero,
                                     onPressed: () {
-                                      context.read<UsersBloc>().add(
+                                      context.read<HomeBloc>().add(
                                           DeleteUserEvent(
                                               id: state.users[index].id!));
                                     },
                                     icon: const Icon(Icons.delete),
-                                  )
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      } else {
-                        return const SizedBox();
-                      }
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                        ],
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  BlocBuilder<HomeBloc, HomeState>(
+                    builder: (context, state) {
+                      return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(20)),
+                        onPressed: () {
+                          (state is GetAllSuccess &&
+                                  state.departments.isNotEmpty)
+                              ? _showUsersDialog(context: context)
+                              : () {};
+                        },
+                        child: const Text(
+                          'Add user',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      );
                     },
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    BlocBuilder<DepartmentsBloc, DepartmentsState>(
-                      builder: (context, state) {
-                        return ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.all(20)),
-                          onPressed: () {
-                            (state is GetAllDepartmentsSuccess &&
-                                    state.departments.isNotEmpty)
-                                ? _showUsersDialog(context: context)
-                                : () {};
-                          },
-                          child: const Text(
-                            'Add user',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        );
-                      },
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(20)),
+                    onPressed: () async {
+                      await Navigator.of(context).pushNamed('departments');
+                      context.read<HomeBloc>().add(GetAllEvent());
+                    },
+                    child: const Text(
+                      'Departments...',
+                      style: TextStyle(fontSize: 20),
                     ),
-                    const SizedBox(width: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(20)),
-                      onPressed: () async {
-                        await Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                                  create: (context) =>
-                                      GetIt.I<DepartmentsBloc>(),
-                                  child: const DepartmentsScreen(),
-                                )));
-                        context.read<UsersBloc>().add(GetAllUsersEvent());
-                        // context
-                        //     .read<DepartmentsBloc>()
-                        //     .add(GetAllDepartmentsEvent());
-                      },
-                      child: const Text(
-                        'Departments...',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
           ),
         ),
       ),

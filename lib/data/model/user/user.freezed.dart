@@ -22,6 +22,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
 mixin _$User {
   int? get id => throw _privateConstructorUsedError;
   String get firstName => throw _privateConstructorUsedError;
+  @Index(unique: true, composite: [CompositeIndex('firstName')])
   String get lastName => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -33,7 +34,11 @@ mixin _$User {
 abstract class $UserCopyWith<$Res> {
   factory $UserCopyWith(User value, $Res Function(User) then) =
       _$UserCopyWithImpl<$Res>;
-  $Res call({int? id, String firstName, String lastName});
+  $Res call(
+      {int? id,
+      String firstName,
+      @Index(unique: true, composite: [CompositeIndex('firstName')])
+          String lastName});
 }
 
 /// @nodoc
@@ -72,7 +77,11 @@ abstract class _$$_UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$$_UserCopyWith(_$_User value, $Res Function(_$_User) then) =
       __$$_UserCopyWithImpl<$Res>;
   @override
-  $Res call({int? id, String firstName, String lastName});
+  $Res call(
+      {int? id,
+      String firstName,
+      @Index(unique: true, composite: [CompositeIndex('firstName')])
+          String lastName});
 }
 
 /// @nodoc
@@ -110,7 +119,11 @@ class __$$_UserCopyWithImpl<$Res> extends _$UserCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$_User extends _User {
-  _$_User({this.id, required this.firstName, required this.lastName})
+  _$_User(
+      {this.id,
+      required this.firstName,
+      @Index(unique: true, composite: [CompositeIndex('firstName')])
+          required this.lastName})
       : super._();
 
   factory _$_User.fromJson(Map<String, dynamic> json) => _$$_UserFromJson(json);
@@ -120,6 +133,7 @@ class _$_User extends _User {
   @override
   final String firstName;
   @override
+  @Index(unique: true, composite: [CompositeIndex('firstName')])
   final String lastName;
 
   @override
@@ -160,7 +174,8 @@ abstract class _User extends User {
   factory _User(
       {final int? id,
       required final String firstName,
-      required final String lastName}) = _$_User;
+      @Index(unique: true, composite: [CompositeIndex('firstName')])
+          required final String lastName}) = _$_User;
   _User._() : super._();
 
   factory _User.fromJson(Map<String, dynamic> json) = _$_User.fromJson;
@@ -170,6 +185,7 @@ abstract class _User extends User {
   @override
   String get firstName => throw _privateConstructorUsedError;
   @override
+  @Index(unique: true, composite: [CompositeIndex('firstName')])
   String get lastName => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)

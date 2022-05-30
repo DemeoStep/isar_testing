@@ -15,12 +15,17 @@ extension GetUserCollection on Isar {
 const UserSchema = CollectionSchema(
   name: 'User',
   schema:
-      '{"name":"User","idName":"id","properties":[{"name":"firstName","type":"String"},{"name":"lastName","type":"String"}],"indexes":[],"links":[{"name":"department","target":"Department"}]}',
+      '{"name":"User","idName":"id","properties":[{"name":"firstName","type":"String"},{"name":"lastName","type":"String"}],"indexes":[{"name":"lastName_firstName","unique":true,"properties":[{"name":"lastName","type":"Hash","caseSensitive":true},{"name":"firstName","type":"Hash","caseSensitive":true}]}],"links":[{"name":"department","target":"Department"}]}',
   idName: 'id',
   propertyIds: {'firstName': 0, 'lastName': 1},
   listProperties: {},
-  indexIds: {},
-  indexValueTypes: {},
+  indexIds: {'lastName_firstName': 0},
+  indexValueTypes: {
+    'lastName_firstName': [
+      IndexValueType.stringHash,
+      IndexValueType.stringHash,
+    ]
+  },
   linkIds: {'department': 0},
   backlinkLinkNames: {},
   getId: _userGetId,
@@ -126,9 +131,84 @@ void _userAttachLinks(IsarCollection col, int id, User object) {
   object.department.attach(col, col.isar.departments, 'department', id);
 }
 
+extension UserByIndex on IsarCollection<User> {
+  Future<User?> getByLastNameFirstName(String lastName, String firstName) {
+    return getByIndex('lastName_firstName', [lastName, firstName]);
+  }
+
+  User? getByLastNameFirstNameSync(String lastName, String firstName) {
+    return getByIndexSync('lastName_firstName', [lastName, firstName]);
+  }
+
+  Future<bool> deleteByLastNameFirstName(String lastName, String firstName) {
+    return deleteByIndex('lastName_firstName', [lastName, firstName]);
+  }
+
+  bool deleteByLastNameFirstNameSync(String lastName, String firstName) {
+    return deleteByIndexSync('lastName_firstName', [lastName, firstName]);
+  }
+
+  Future<List<User?>> getAllByLastNameFirstName(
+      List<String> lastNameValues, List<String> firstNameValues) {
+    final len = lastNameValues.length;
+    assert(firstNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([lastNameValues[i], firstNameValues[i]]);
+    }
+
+    return getAllByIndex('lastName_firstName', values);
+  }
+
+  List<User?> getAllByLastNameFirstNameSync(
+      List<String> lastNameValues, List<String> firstNameValues) {
+    final len = lastNameValues.length;
+    assert(firstNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([lastNameValues[i], firstNameValues[i]]);
+    }
+
+    return getAllByIndexSync('lastName_firstName', values);
+  }
+
+  Future<int> deleteAllByLastNameFirstName(
+      List<String> lastNameValues, List<String> firstNameValues) {
+    final len = lastNameValues.length;
+    assert(firstNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([lastNameValues[i], firstNameValues[i]]);
+    }
+
+    return deleteAllByIndex('lastName_firstName', values);
+  }
+
+  int deleteAllByLastNameFirstNameSync(
+      List<String> lastNameValues, List<String> firstNameValues) {
+    final len = lastNameValues.length;
+    assert(firstNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([lastNameValues[i], firstNameValues[i]]);
+    }
+
+    return deleteAllByIndexSync('lastName_firstName', values);
+  }
+}
+
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
   QueryBuilder<User, User, QAfterWhere> anyId() {
     return addWhereClauseInternal(const IdWhereClause.any());
+  }
+
+  QueryBuilder<User, User, QAfterWhere> anyLastNameFirstName() {
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'lastName_firstName'));
   }
 }
 
@@ -184,6 +264,71 @@ extension UserQueryWhere on QueryBuilder<User, User, QWhereClause> {
       upper: upperId,
       includeUpper: includeUpper,
     ));
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> lastNameEqualTo(String lastName) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'lastName_firstName',
+      value: [lastName],
+    ));
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> lastNameNotEqualTo(
+      String lastName) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'lastName_firstName',
+        upper: [lastName],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'lastName_firstName',
+        lower: [lastName],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'lastName_firstName',
+        lower: [lastName],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'lastName_firstName',
+        upper: [lastName],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> lastNameFirstNameEqualTo(
+      String lastName, String firstName) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'lastName_firstName',
+      value: [lastName, firstName],
+    ));
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> lastNameFirstNameNotEqualTo(
+      String lastName, String firstName) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'lastName_firstName',
+        upper: [lastName, firstName],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'lastName_firstName',
+        lower: [lastName, firstName],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'lastName_firstName',
+        lower: [lastName, firstName],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'lastName_firstName',
+        upper: [lastName, firstName],
+        includeUpper: false,
+      ));
+    }
   }
 }
 

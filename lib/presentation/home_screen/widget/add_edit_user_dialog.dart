@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar_testing/data/model/department/department.dart';
 import 'package:isar_testing/data/model/user/user.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:isar_testing/data/source/local/department_repository.dart';
-import 'package:isar_testing/presentation/bloc/department_bloc/department_bloc.dart';
-import 'package:isar_testing/presentation/bloc/users_bloc/users_bloc.dart';
 import 'package:isar_testing/presentation/home_screen/widget/dropdown_widget.dart';
 
 class AddEditUserDialog extends StatelessWidget {
@@ -23,6 +20,7 @@ class AddEditUserDialog extends StatelessWidget {
   _init(BuildContext context) {
     userDepartment = _departmentRepository.departments.first;
     if (user != null) {
+      userDepartment = user!.department.value ?? userDepartment;
       _firstNameController.text = user!.firstName;
       _lastNameController.text = user!.lastName;
     }
@@ -89,7 +87,7 @@ class AddEditUserDialog extends StatelessWidget {
                       userDepartment =
                           _departmentRepository.departments[value!];
                     },
-                    value: user == null
+                    value: user == null || user?.department.value?.name == null
                         ? 0
                         : _departmentRepository.departments.indexWhere(
                             (element) =>

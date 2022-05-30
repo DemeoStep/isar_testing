@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:isar_testing/data/model/department/department.dart';
 import 'package:isar_testing/data/model/user/user.dart';
 import 'package:isar_testing/data/source/local/user_repository.dart';
 
@@ -44,14 +45,30 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<void> updateUser(User user) async {
+  Future<IsarError?> updateUser(User user) async {
     try {
       await _isar?.writeTxn((isar) async {
         await _isar?.users.put(user);
         await user.department.save();
       });
+      return null;
+    } catch (e) {
+      return e as IsarError;
+    }
+  }
+
+  @override
+  Future<List<User>> getByDepartment(Department department) async {
+    List<User> filteredList = [];
+    try {
+      await department.users.load();
+      for (User user in department.users) {
+        await user.department.load();
+      }
+      filteredList.addAll(department.users);
     } catch (e) {
       print(e);
     }
+    return filteredList;
   }
 }

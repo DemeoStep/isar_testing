@@ -3,10 +3,11 @@ import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_testing/core/di.dart';
 import 'package:isar_testing/data/model/department/department.dart';
-import 'package:isar_testing/presentation/bloc/department_bloc/department_bloc.dart';
-import 'package:isar_testing/presentation/bloc/users_bloc/users_bloc.dart';
-import 'package:isar_testing/presentation/home_screen/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:isar_testing/presentation/bloc/department_bloc/department_bloc.dart';
+import 'package:isar_testing/presentation/bloc/home_bloc/home_bloc.dart';
+import 'package:isar_testing/presentation/departments_screen/departments_screen.dart';
+import 'package:isar_testing/presentation/home_screen/home_screen.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'data/model/user/user.dart';
@@ -32,17 +33,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => GetIt.I<UsersBloc>(),
-          ),
-          BlocProvider(
-            create: (context) => GetIt.I<DepartmentsBloc>(),
-          ),
-        ],
-        child: const HomeScreen(),
-      ),
+      routes: {
+        'home': (context) => BlocProvider(
+              create: (context) => GetIt.I<HomeBloc>(),
+              child: const HomeScreen(),
+            ),
+        'departments': (context) => BlocProvider(
+              create: (context) => DepartmentsBloc(),
+              child: const DepartmentsScreen(),
+            )
+      },
+      initialRoute: 'home',
     );
   }
 }

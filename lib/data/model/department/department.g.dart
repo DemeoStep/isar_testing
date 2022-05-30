@@ -21,8 +21,8 @@ const DepartmentSchema = CollectionSchema(
   listProperties: {},
   indexIds: {},
   indexValueTypes: {},
-  linkIds: {},
-  backlinkLinkNames: {},
+  linkIds: {'users': 0},
+  backlinkLinkNames: {'users': 'department'},
   getId: _departmentGetId,
   getLinks: _departmentGetLinks,
   attachLinks: _departmentAttachLinks,
@@ -44,7 +44,7 @@ int? _departmentGetId(Department object) {
 }
 
 List<IsarLinkBase> _departmentGetLinks(Department object) {
-  return [];
+  return [object.users];
 }
 
 void _departmentSerializeNative(
@@ -73,6 +73,7 @@ Department _departmentDeserializeNative(IsarCollection<Department> collection,
     id: id,
     name: reader.readString(offsets[0]),
   );
+  _departmentAttachLinks(collection, id, object);
   return object;
 }
 
@@ -102,6 +103,8 @@ Department _departmentDeserializeWeb(
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     name: IsarNative.jsObjectGet(jsObj, 'name') ?? '',
   );
+  _departmentAttachLinks(
+      collection, IsarNative.jsObjectGet(jsObj, 'id'), object);
   return object;
 }
 
@@ -116,7 +119,9 @@ P _departmentDeserializePropWeb<P>(Object jsObj, String propertyName) {
   }
 }
 
-void _departmentAttachLinks(IsarCollection col, int id, Department object) {}
+void _departmentAttachLinks(IsarCollection col, int id, Department object) {
+  object.users.attach(col, col.isar.users, 'users', id);
+}
 
 extension DepartmentQueryWhereSort
     on QueryBuilder<Department, Department, QWhere> {
@@ -344,7 +349,16 @@ extension DepartmentQueryFilter
 }
 
 extension DepartmentQueryLinks
-    on QueryBuilder<Department, Department, QFilterCondition> {}
+    on QueryBuilder<Department, Department, QFilterCondition> {
+  QueryBuilder<Department, Department, QAfterFilterCondition> users(
+      FilterQuery<User> q) {
+    return linkInternal(
+      isar.users,
+      q,
+      'users',
+    );
+  }
+}
 
 extension DepartmentQueryWhereSortBy
     on QueryBuilder<Department, Department, QSortBy> {

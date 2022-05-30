@@ -14,7 +14,7 @@ class DropdownWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField2<int>(
       value: value,
-      dropdownMaxHeight: 200,
+      dropdownMaxHeight: 300,
       validator: (value) {
         if (value == null) {
           return 'required';
