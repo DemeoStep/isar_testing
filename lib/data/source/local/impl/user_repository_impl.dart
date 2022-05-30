@@ -37,6 +37,7 @@ class UserRepositoryImpl implements UserRepository {
       for (User user in newList) {
         await user.department.load();
       }
+      newList.sort((a, b) => a.firstName.compareTo(b.firstName));
       users.addAll(newList);
     } catch (e) {
       print(e);

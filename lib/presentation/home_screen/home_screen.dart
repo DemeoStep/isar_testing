@@ -61,13 +61,14 @@ class HomeScreen extends StatelessWidget {
                   },
                   builder: (context, state) {
                     if (state is GetAllSuccess) {
+                      var value = 0;
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
                             child: DropdownWidget(
-                              value: 0,
+                              value: value,
                               onChanged: (value) {
                                 if (value != null) {
                                   if (value == 0) {
